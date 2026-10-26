@@ -231,116 +231,134 @@ EQ_SERIES = {"EQ", "BE", "BZ", "SM", "ST"}
 st.set_page_config(page_title="BUY Dashboard", page_icon="📊", layout="wide")
 
 # ====================================================================== THEME
-# Muted accent per market-cap group (used for thin borders, badges and sector rows)
-CAP_COLOR = {"Largecap": "#1E3A8A", "Midcap": "#0F766E", "Smallcap": "#B45309", "Microcap": "#9F1239"}
+CAP_STYLE = {                       # icon, main colour, light colour (for each cap card)
+    "Largecap": ("🏛️", "#4F46E5", "#818CF8"),
+    "Midcap": ("🚀", "#0891B2", "#22D3EE"),
+    "Smallcap": ("⚡", "#D97706", "#FBBF24"),
+    "Microcap": ("🌱", "#DB2777", "#F472B6"),
+}
 
 st.markdown("""<style>
-@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
-:root {--navy:#0B1F3A; --navy2:#13294B; --ink:#0F172A; --text:#334155; --muted:#64748B; --faint:#94A3B8;
-       --line:#E2E8F0; --soft:#F1F5F9; --bg:#F4F6FA; --accent:#0F766E; --accent2:#115E59;
-       --up:#15803D; --upbg:#ECFDF5; --down:#B91C1C; --downbg:#FEF2F2;}
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap');
 html, body, .stApp, .stMarkdown, button, input, textarea, select, label, p {font-family:'Inter',sans-serif;}
-.ui, .ui * {font-family:'Inter',sans-serif !important;}
-.stApp {background:var(--bg);}
+.hero, .hero *, .chips, .chips *, .kpis, .kpis *, .caps, .caps *, .sb-title, .sb-sub, .sb-h, .sb-sec {font-family:'Inter',sans-serif !important;}
+.stApp {background:
+   radial-gradient(1100px 520px at 0% -10%, #E0E7FF 0%, transparent 60%),
+   radial-gradient(900px 480px at 100% -5%, #FCE7F3 0%, transparent 55%), #F8FAFC;}
 header[data-testid="stHeader"] {background:transparent;}
-.block-container {padding-top:1.4rem; max-width:1440px;}
+.block-container {padding-top:1.3rem; max-width:1500px;}
 
-/* ---------- header band ---------- */
-.top {display:flex; justify-content:space-between; align-items:center; gap:16px; background:var(--navy);
-      border-radius:12px; padding:20px 26px; color:#fff; box-shadow:0 8px 24px -16px rgba(11,31,58,.6);}
-.top h1 {font-size:1.45rem !important; font-weight:650; color:#fff !important; margin:0; padding:0; letter-spacing:-.01em;}
-.top .sub {color:#A9B8CF; font-size:.84rem; margin-top:4px;}
-.meta {color:#A9B8CF; font-size:.78rem; text-align:right; line-height:1.7;}
-.meta b {color:#fff; font-weight:600;}
-.tag {display:inline-block; border:1px solid rgba(255,255,255,.18); background:rgba(255,255,255,.06);
-      color:#E2E8F0; border-radius:6px; padding:2px 9px; font-size:.74rem; margin-left:6px;}
-.live-dot {display:inline-block; width:7px; height:7px; border-radius:50%; background:#34D399; margin-right:6px; vertical-align:1px;}
+/* ---------- hero ---------- */
+.hero {position:relative; overflow:hidden; border-radius:22px; padding:26px 30px; color:#fff;
+   background:linear-gradient(120deg,#1E1B4B 0%,#4338CA 42%,#7C3AED 72%,#DB2777 100%);
+   box-shadow:0 22px 44px -18px rgba(67,56,202,.55); display:flex; justify-content:space-between;
+   align-items:center; gap:18px;}
+.hero:before, .hero:after {content:""; position:absolute; border-radius:50%; background:rgba(255,255,255,.08);}
+.hero:before {width:280px; height:280px; right:-70px; top:-120px;}
+.hero:after {width:180px; height:180px; right:180px; bottom:-120px;}
+.hero h1 {color:#fff !important; margin:4px 0 4px; padding:0; font-size:2.05rem; font-weight:800; letter-spacing:-.02em;}
+.hero p {margin:0; opacity:.85; font-size:.98rem;}
+.eyebrow {font-size:.7rem; letter-spacing:.2em; font-weight:700; opacity:.75;}
+.hero-r {display:flex; gap:8px; align-items:center; z-index:1; flex-wrap:wrap; justify-content:flex-end;}
+.live {background:rgba(16,185,129,.18); border:1px solid rgba(52,211,153,.55); color:#D1FAE5;
+   padding:6px 13px; border-radius:999px; font-weight:600; font-size:.82rem; white-space:nowrap;}
+.dot {display:inline-block; width:8px; height:8px; border-radius:50%; background:#34D399; margin-right:7px;
+   animation:pulse 1.8s infinite;}
+@keyframes pulse {0%{box-shadow:0 0 0 0 rgba(52,211,153,.75)} 70%{box-shadow:0 0 0 9px rgba(52,211,153,0)}
+   100%{box-shadow:0 0 0 0 rgba(52,211,153,0)}}
+.pill-glass {background:rgba(255,255,255,.14); border:1px solid rgba(255,255,255,.22); padding:6px 13px;
+   border-radius:999px; font-size:.82rem; white-space:nowrap;}
 
-/* ---------- active rule ---------- */
-.rule {display:flex; flex-wrap:wrap; align-items:center; gap:6px; font-size:.8rem;}
-.rule .lbl {font-size:.68rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted); margin-right:4px;}
-.rule code {background:#fff; border:1px solid var(--line); border-left:3px solid var(--accent); color:var(--ink);
-            border-radius:6px; padding:3px 9px; font-family:'Inter',sans-serif !important; font-size:.78rem; font-weight:500;}
-.rule .op {color:var(--faint); font-size:.66rem; font-weight:700; letter-spacing:.06em;}
+/* ---------- query chips ---------- */
+.chips {display:flex; flex-wrap:wrap; gap:7px; align-items:center; margin:4px 0;}
+.chip-label {font-size:.75rem; color:#64748B; font-weight:700; text-transform:uppercase; letter-spacing:.08em; margin-right:4px;}
+.chip {background:#fff; border:1px solid #E0E7FF; color:#3730A3; padding:5px 12px; border-radius:999px;
+   font-size:.8rem; font-weight:600; box-shadow:0 1px 2px rgba(15,23,42,.06);}
+.join {font-size:.66rem; color:#A5B4FC; font-weight:800;}
 
-/* ---------- stat strip ---------- */
-.stats {display:grid; grid-template-columns:repeat(var(--n,5),1fr); gap:12px; margin:16px 0 18px;}
-.stat {background:#fff; border:1px solid var(--line); border-top:3px solid var(--c,var(--navy)); border-radius:10px; padding:13px 16px;}
-.stat .k {font-size:.68rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:var(--muted);}
-.stat .v {font-size:1.65rem; font-weight:650; color:var(--navy); margin-top:6px; line-height:1.1; font-variant-numeric:tabular-nums;}
-.stat .s {font-size:.75rem; color:var(--faint); margin-top:3px; font-variant-numeric:tabular-nums;}
-.stat.hero {background:var(--navy2); border-color:var(--navy2); border-top-color:#34D399;}
-.stat.hero .k {color:#A9B8CF;} .stat.hero .v {color:#fff;} .stat.hero .s {color:#A9B8CF;}
-@media (max-width:1000px) {.stats {grid-template-columns:repeat(2,1fr);}}
+/* ---------- KPI cards ---------- */
+.kpis {display:grid; grid-template-columns:repeat(var(--n,5),1fr); gap:14px; margin:8px 0 20px;}
+@media (max-width:1100px) {.kpis {grid-template-columns:repeat(2,1fr);}}
+.kpi {position:relative; overflow:hidden; background:#fff; border-radius:18px; padding:16px 18px 14px;
+   border:1px solid #EEF2F7; box-shadow:0 10px 26px -16px rgba(15,23,42,.3);}
+.kpi:before {content:""; position:absolute; left:0; top:0; bottom:0; width:5px; background:var(--c);}
+.kpi-top {display:flex; align-items:center; gap:9px; color:#64748B; font-weight:600; font-size:.84rem;}
+.kpi-ic {width:32px; height:32px; border-radius:10px; display:grid; place-items:center; font-size:1rem;
+   background:color-mix(in srgb, var(--c) 14%, white);}
+.kpi-val {font-size:2.1rem; font-weight:800; color:#0F172A; margin-top:8px; line-height:1; font-variant-numeric:tabular-nums;}
+.kpi-sub {font-size:.76rem; color:#94A3B8; margin-top:5px;}
+.kpi-bar {height:6px; background:#F1F5F9; border-radius:99px; margin-top:10px; overflow:hidden;}
+.kpi-bar span {display:block; height:100%; border-radius:99px; background:linear-gradient(90deg,var(--c),var(--c2,var(--c)));}
+.kpi.dark {background:linear-gradient(135deg,#0F172A 0%,#312E81 100%); border:none;}
+.kpi.dark:before {background:linear-gradient(#34D399,#10B981);}
+.kpi.dark .kpi-val {color:#fff;} .kpi.dark .kpi-top {color:#C7D2FE;} .kpi.dark .kpi-sub {color:#A5B4FC;}
+.kpi.dark .kpi-ic {background:rgba(255,255,255,.12);}
 
-/* ---------- cap panels ---------- */
-.panels {display:grid; grid-template-columns:1fr 1fr; gap:16px;}
-@media (max-width:1000px) {.panels {grid-template-columns:1fr;}}
-.panel {background:#fff; border:1px solid var(--line); border-radius:10px; overflow:hidden;
-        box-shadow:0 1px 2px rgba(15,23,42,.04);}
-.panel-h {display:flex; justify-content:space-between; align-items:center; padding:12px 18px;
-          border-bottom:1px solid var(--line); border-left:4px solid var(--c);}
-.panel-h .t {font-size:.95rem; font-weight:650; color:var(--navy);}
-.panel-h .t small {display:block; font-size:.72rem; font-weight:500; color:var(--faint); margin-top:1px;}
-.badge {background:color-mix(in srgb, var(--c) 10%, white); color:var(--c); border:1px solid color-mix(in srgb, var(--c) 25%, white);
-        border-radius:999px; padding:3px 11px; font-size:.78rem; font-weight:650; font-variant-numeric:tabular-nums;}
-.panel-b {max-height:440px; overflow-y:auto;}
-.panel-b::-webkit-scrollbar {width:6px;} .panel-b::-webkit-scrollbar-thumb {background:var(--line); border-radius:6px;}
-table.grid {width:100%; border-collapse:collapse; margin:0; display:table; font-size:.85rem;}
-table.grid, table.grid th, table.grid td {border:none !important;}
-table.grid thead th {position:sticky; top:0; z-index:1; background:#F8FAFC; color:var(--muted); font-weight:600;
-    font-size:.66rem; letter-spacing:.08em; text-transform:uppercase; padding:8px 18px; text-align:left;
-    border-bottom:1px solid var(--line) !important;}
-table.grid td {padding:8px 18px; color:var(--text); border-bottom:1px solid var(--soft) !important; font-variant-numeric:tabular-nums;}
-table.grid tbody tr:last-child td {border-bottom:none !important;}
-table.grid tbody tr:not(.grp):hover td {background:#F8FAFC;}
-table.grid .r {text-align:right;}
-tr.grp td {background:color-mix(in srgb, var(--c) 6%, white); color:var(--c); font-size:.66rem; font-weight:700;
-    letter-spacing:.08em; text-transform:uppercase; padding:6px 18px;}
-tr.grp td span {color:var(--faint); font-weight:600; margin-left:6px;}
-td.sym {font-weight:650; color:var(--navy) !important;}
-.chg {display:inline-block; min-width:72px; text-align:right; padding:2px 8px; border-radius:6px; font-weight:600;}
-.up {color:var(--up); background:var(--upbg);} .down {color:var(--down); background:var(--downbg);} .flat {color:var(--faint);}
-.none {padding:34px 18px; text-align:center; color:var(--faint); font-size:.85rem;}
+/* ---------- cap cards ---------- */
+.caps {display:grid; grid-template-columns:1fr 1fr; gap:18px;}
+@media (max-width:1000px) {.caps {grid-template-columns:1fr;}}
+.cap {background:#fff; border-radius:20px; border:1px solid #EEF2F7; overflow:hidden;
+   box-shadow:0 14px 34px -20px rgba(15,23,42,.4); transition:transform .15s ease, box-shadow .15s ease;}
+.cap:hover {transform:translateY(-2px); box-shadow:0 20px 40px -20px rgba(15,23,42,.45);}
+.cap-head {display:flex; justify-content:space-between; align-items:center; padding:16px 20px; color:#fff;
+   background:linear-gradient(120deg,var(--c),var(--c2));}
+.cap-title {font-size:1.15rem; font-weight:800; letter-spacing:-.01em;}
+.cap-sub {font-size:.74rem; opacity:.88; margin-top:2px;}
+.cap-count {text-align:center; background:rgba(255,255,255,.2); border:1px solid rgba(255,255,255,.4);
+   border-radius:14px; padding:5px 14px; line-height:1.05;}
+.cap-count b {display:block; font-size:1.45rem; font-weight:800;}
+.cap-count small {font-size:.62rem; letter-spacing:.12em; opacity:.9;}
+.cap-body {max-height:430px; overflow-y:auto;}
+.cap-body::-webkit-scrollbar {width:8px;} .cap-body::-webkit-scrollbar-thumb {background:#E2E8F0; border-radius:8px;}
+table.tbl {width:100%; border-collapse:collapse; font-size:.88rem; margin:0; display:table;}
+table.tbl, table.tbl th, table.tbl td {border:none !important;}
+table.tbl thead th {position:sticky; top:0; z-index:1; background:#F8FAFC; color:#64748B; font-weight:700;
+   font-size:.68rem; text-transform:uppercase; letter-spacing:.08em; padding:10px 20px; text-align:left;
+   border-bottom:1px solid #EEF2F7 !important;}
+table.tbl td {padding:9px 20px; border-bottom:1px solid #F1F5F9 !important; color:#0F172A;}
+table.tbl tbody tr:hover td {background:#F8FAFF;}
+table.tbl .r {text-align:right;}
+tr.sec td {background:color-mix(in srgb, var(--c) 8%, white); color:var(--c); font-weight:800;
+   font-size:.74rem; letter-spacing:.04em; text-transform:uppercase; padding:7px 20px;}
+.sec-n {background:#fff; color:#475569; border:1px solid #E2E8F0; border-radius:99px; padding:1px 8px;
+   margin-left:6px; font-size:.68rem; font-weight:700;}
+.sym {font-weight:700; letter-spacing:.01em;}
+.price {color:#475569; font-variant-numeric:tabular-nums;}
+.pct {display:inline-block; min-width:84px; text-align:center; padding:4px 10px; border-radius:999px;
+   font-weight:700; font-size:.8rem; font-variant-numeric:tabular-nums;}
+.empty {padding:38px 20px; text-align:center; color:#94A3B8; font-weight:600;}
+.empty span {display:block; font-size:2rem; margin-bottom:6px;}
 
-/* ---------- buttons, table ---------- */
-.stButton button, .stDownloadButton button {border-radius:8px; font-weight:500;}
-.stButton button[kind="primary"], .stDownloadButton button {background:var(--accent); border:1px solid var(--accent); color:#fff;}
-.stButton button[kind="primary"]:hover, .stDownloadButton button:hover {background:var(--accent2); border-color:var(--accent2); color:#fff;}
-.main .stButton button[kind="secondary"], [data-testid="stMain"] .stButton button[kind="secondary"]
-    {background:#fff; border:1px solid var(--navy); color:var(--navy);}
-[data-testid="stMain"] .stButton button[kind="secondary"]:hover {background:var(--navy); color:#fff;}
-div[data-testid="stDataFrame"] {background:#fff; border:1px solid var(--line); border-radius:10px; padding:2px;}
+/* ---------- buttons / table / sidebar ---------- */
+.stButton button[kind="primary"], .stDownloadButton button {background:linear-gradient(90deg,#6366F1,#A855F7,#EC4899);
+   border:none; color:#fff; font-weight:700; border-radius:12px; box-shadow:0 8px 20px -10px rgba(99,102,241,.8);}
+.stButton button[kind="primary"]:hover, .stDownloadButton button:hover {filter:brightness(1.07); color:#fff;}
+div[data-testid="stDataFrame"] {background:#fff; border-radius:16px; padding:6px; border:1px solid #EEF2F7;
+   box-shadow:0 10px 26px -18px rgba(15,23,42,.35);}
 
-/* ---------- sidebar (navy) ---------- */
-section[data-testid='stSidebar'] {width:600px !important; background:var(--navy);}
+section[data-testid='stSidebar'] {width:600px !important; background:linear-gradient(180deg,#0F172A 0%,#1E1B4B 100%);}
 section[data-testid='stSidebar'] [data-testid='stVerticalBlock'] {gap:0.4rem;}
 section[data-testid='stSidebar'] div[data-testid='stHorizontalBlock'] {gap:0.35rem;}
-section[data-testid='stSidebar'] [data-testid='stWidgetLabel'] p, section[data-testid='stSidebar'] label,
-section[data-testid='stSidebar'] .stMarkdown p, section[data-testid='stSidebar'] [data-testid='stCaptionContainer']
-    {color:#CBD5E1 !important;}
-section[data-testid='stSidebar'] [data-testid='stSelectbox'] div[data-baseweb="select"] > div,
-section[data-testid='stSidebar'] [data-testid='stMultiSelect'] div[data-baseweb="select"] > div
-    {background:#fff !important; border:1px solid transparent !important; border-radius:8px !important;}
-section[data-testid='stSidebar'] div[data-baseweb="select"] * {color:var(--ink) !important; -webkit-text-fill-color:var(--ink);}
+section[data-testid='stSidebar'] h1, section[data-testid='stSidebar'] h2, section[data-testid='stSidebar'] h3,
+section[data-testid='stSidebar'] [data-testid='stWidgetLabel'] p, section[data-testid='stSidebar'] .stMarkdown p,
+section[data-testid='stSidebar'] [data-testid='stCaptionContainer'], section[data-testid='stSidebar'] label {color:#E2E8F0 !important;}
+section[data-testid='stSidebar'] div[data-baseweb="select"] > div {background:#fff; border-radius:10px; border:none; padding-left:4px;}
 section[data-testid='stSidebar'] div[data-baseweb="select"] > div > div:first-child {padding-left:6px; padding-right:0;}
-section[data-testid='stSidebar'] [data-testid='stNumberInput'] > div > div,
-section[data-testid='stSidebar'] [data-testid='stTextInput'] > div > div {background:#fff; border:1px solid transparent; border-radius:8px;}
-section[data-testid='stSidebar'] input {background:#fff; color:var(--ink);}
-section[data-testid='stSidebar'] input:disabled {background:#1E3557 !important; color:#5B6F8F !important; -webkit-text-fill-color:#5B6F8F;}
-section[data-testid='stSidebar'] [data-testid='stNumberInput'] > div > div:has(input:disabled) {background:#1E3557; border-color:#1E3557;}
-section[data-testid='stSidebar'] div[data-baseweb="select"]:has(input:disabled) > div {background:#C9D3E1 !important;}
-section[data-testid='stSidebar'] .stButton button {min-height:2.35rem; padding:0.15rem 0.5rem; background:rgba(255,255,255,.06);
-    border:1px solid rgba(255,255,255,.16); color:#E2E8F0;}
-section[data-testid='stSidebar'] .stButton button:hover {border-color:#5EEAD4; color:#fff;}
-section[data-testid='stSidebar'] .stButton button[kind="primary"] {background:var(--accent); border-color:var(--accent); color:#fff;}
-section[data-testid='stSidebar'] .stButton button[kind="primary"]:hover {background:#14B8A6; border-color:#14B8A6;}
-section[data-testid='stSidebar'] hr {border-color:rgba(255,255,255,.1);}
-.sb-title {font-size:1.1rem; font-weight:650; color:#fff; margin-top:-6px;}
-.sb-sub {font-size:.8rem; color:#8EA0BC; margin:2px 0 10px;}
-.sb-h {font-size:.64rem; font-weight:600; letter-spacing:.08em; text-transform:uppercase; color:#8EA0BC;}
-.sb-sec {font-size:.68rem; font-weight:650; letter-spacing:.1em; text-transform:uppercase; color:#5EEAD4;
-         margin:10px 0 2px; padding-top:12px; border-top:1px solid rgba(255,255,255,.1);}
+section[data-testid='stSidebar'] div[data-baseweb="select"] * {color:#0F172A !important; -webkit-text-fill-color:#0F172A;}
+section[data-testid='stSidebar'] [data-testid='stNumberInput'] input,
+section[data-testid='stSidebar'] [data-testid='stTextInput'] input {background:#fff; color:#0F172A; border-radius:10px;}
+section[data-testid='stSidebar'] input:disabled {background:rgba(255,255,255,.05) !important; color:#475569 !important; -webkit-text-fill-color:#475569;}
+section[data-testid='stSidebar'] [data-testid='stNumberInput'] div:has(> input:disabled) {background:rgba(255,255,255,.06) !important; border-color:rgba(255,255,255,.08) !important;}
+section[data-testid='stSidebar'] div[data-baseweb="select"][aria-disabled="true"] > div {background:rgba(255,255,255,.12);}
+section[data-testid='stSidebar'] .stButton button {background:rgba(255,255,255,.07); border:1px solid rgba(255,255,255,.16);
+   color:#F8FAFC; border-radius:10px; padding:0.15rem 0.5rem; min-height:2.35rem;}
+section[data-testid='stSidebar'] .stButton button:hover {border-color:#A5B4FC; color:#fff; background:rgba(165,180,252,.12);}
+section[data-testid='stSidebar'] .stButton button[kind="primary"] {background:linear-gradient(90deg,#6366F1,#EC4899); border:none;}
+section[data-testid='stSidebar'] hr {border-color:rgba(255,255,255,.12);}
+.sb-title {font-size:1.35rem; font-weight:800; color:#fff; letter-spacing:-.01em; margin-top:-8px;}
+.sb-sub {font-size:.8rem; color:#A5B4FC; margin:2px 0 10px;}
+.sb-h {font-size:.66rem; font-weight:800; letter-spacing:.12em; text-transform:uppercase; color:#A5B4FC;}
+.sb-sec {font-size:.72rem; font-weight:800; letter-spacing:.14em; text-transform:uppercase; color:#818CF8; margin:8px 0 2px;}
 </style>""", unsafe_allow_html=True)
 
 
@@ -715,8 +733,8 @@ def sentence(r: dict) -> str:
 
 
 sb = st.sidebar
-sb.markdown('<div class="ui"><div class="sb-title">Screener</div>'
-            '<div class="sb-sub">Define the BUY rule and press Apply.</div></div>', unsafe_allow_html=True)
+sb.markdown('<div class="sb-title">🧮 Stock Screener</div>'
+            '<div class="sb-sub">Build your BUY rule, then press Apply</div>', unsafe_allow_html=True)
 
 # ① preset + ③ AND/OR on one line
 p1, p2 = sb.columns([3, 2])
@@ -757,7 +775,7 @@ for r in st.session_state["draft"]:
                           step=0.01 if r["Math"] in ("×", "÷") else 1.0, format="%g",
                           key=f"n_{rid}", label_visibility="collapsed", disabled=not needs_number)
     r["Number"] = val if needs_number else None
-    c6.button("✕", key=f"del_{rid}", help=f"Remove: {sentence(r)}",
+    c6.button("🗑️", key=f"del_{rid}", help=f"{sentence(r)} — click to remove",
               on_click=delete_condition, args=(rid,))
 
 if not st.session_state["draft"]:
@@ -766,11 +784,11 @@ if not st.session_state["draft"]:
 pending = ([{k: r[k] for k in ("Field", "Op", "Compare to", "Math", "Number")} for r in st.session_state["draft"]]
            != st.session_state["rules"] or st.session_state["match_choice"] != st.session_state["match"])
 b1, b2 = sb.columns(2)
-b1.button("Add condition", on_click=add_condition, width="stretch")
-b2.button("Apply" + (" •" if pending else ""), type="primary", width="stretch",
+b1.button("➕ Add condition", on_click=add_condition, width="stretch")
+b2.button("✅ Apply" + (" •" if pending else ""), type="primary", width="stretch",
           on_click=apply_conditions, help="Changes not applied yet" if pending else "Up to date")
 if pending:
-    sb.caption("Unapplied changes — press Apply to update the dashboard.")
+    sb.caption("🟡 You have changes that are not applied yet — press **Apply**.")
 
 rules, match_mode = st.session_state["rules"], st.session_state["match"]
 
@@ -789,7 +807,7 @@ if show_all:                         # these filters only matter on the "all cal
         view = view[view["_sym"].str.contains(search, case=False, na=False)]
     only_buy = st.sidebar.checkbox("Show only BUY")
 st.sidebar.divider()
-if st.sidebar.button("Reload data", width="stretch"):
+if st.sidebar.button("🔄 Reload data", width="stretch"):
     st.cache_data.clear()
     st.rerun()
 
@@ -798,34 +816,34 @@ def toggle_view():
     st.session_state["show_all"] = not st.session_state.get("show_all", False)
 
 
-def page_header(title: str, subtitle: str):
-    now = pd.Timestamp.now(tz="Asia/Kolkata")
+def hero(title: str, subtitle: str):
     st.markdown(
-        f'<div class="ui top"><div><h1>{esc(title)}</h1><div class="sub">{esc(subtitle)}</div></div>'
-        f'<div class="meta"><span class="live-dot"></span>Live<span class="tag">Auto-refresh {REFRESH_SEC // 60} min</span>'
-        f'<span class="tag">{len(data):,} stocks</span><br>Loaded {now:%d %b %Y, %I:%M %p} IST</div></div>',
-        unsafe_allow_html=True)
+        f'<div class="hero"><div style="z-index:1"><div class="eyebrow">NSE · LIVE STOCK SCREENER</div>'
+        f'<h1>{esc(title)}</h1><p>{esc(subtitle)}</p></div>'
+        f'<div class="hero-r"><span class="live"><span class="dot"></span>Live</span>'
+        f'<span class="pill-glass">⟳ every {REFRESH_SEC // 60} min</span>'
+        f'<span class="pill-glass">{len(data):,} stocks</span></div></div>', unsafe_allow_html=True)
 
 
-def rule_line(rules: list, match_mode: str) -> str:
+def query_chips(rules: list, match_mode: str) -> str:
     active = [r for r in rules if r.get("On", True)]
     if not active:
-        return '<div class="ui rule"><span class="lbl">Active rule</span><code>none — every stock is BUY</code></div>'
-    op = '<span class="op">AND</span>' if match_mode == "ALL" else '<span class="op">OR</span>'
-    parts = op.join(f'<code>{esc(r["Field"])} {esc(SYM.get(r["Op"], r["Op"]))} {esc(right_text(r))}</code>'
-                    for r in active)
-    return f'<div class="ui rule"><span class="lbl">Active rule</span>{parts}</div>'
+        return '<div class="chips"><span class="chip-label">Active query</span><span class="chip">no conditions — every stock is BUY</span></div>'
+    join = '<span class="join">AND</span>' if match_mode == "ALL" else '<span class="join">OR</span>'
+    chips = join.join(f'<span class="chip">{esc(r["Field"])} {esc(SYM.get(r["Op"], r["Op"]))} {esc(right_text(r))}</span>'
+                      for r in active)
+    return f'<div class="chips"><span class="chip-label">Active query</span>{chips}</div>'
 
 
 if show_all:
-    page_header("All stocks", "Sheet values, moving averages, RSI and the BUY / AVOID signal for every stock")
+    hero("All Calculated Data", "Every stock with its sheet values, moving averages, RSI and BUY / AVOID signal")
 else:
-    page_header("BUY signals", "NSE equities screened by market-cap group")
+    hero("BUY Dashboard", "Today's BUY signals across Largecap · Midcap · Smallcap · Microcap")
 st.write("")
-bar_l, bar_r = st.columns([5, 1.1], vertical_alignment="center")
-bar_l.markdown(rule_line(rules, match_mode), unsafe_allow_html=True)
-bar_r.button("Back to signals" if show_all else "View all stocks",
-             on_click=toggle_view, width="stretch")
+bar_l, bar_r = st.columns([4.4, 1.6], vertical_alignment="center")
+bar_l.markdown(query_chips(rules, match_mode), unsafe_allow_html=True)
+bar_r.button("⬅️ Back to dashboard" if show_all else "📋 Show all calculated data",
+             on_click=toggle_view, type="primary", width="stretch")
 
 
 # ====================================================================== SIGNAL
@@ -884,16 +902,16 @@ def add_signal(t: pd.DataFrame, rules: list, match_mode: str) -> pd.DataFrame:
 
 
 def style(t: pd.DataFrame):
-    """BUY rows lightly tinted green; OHLC cell amber when it looks wrong."""
-    red = "background-color: #F0FDF4; color: #14532D; font-weight: 600"      # BUY rows: subtle green tint
-    yellow = "background-color: #FEF3C7; color: #92400E; font-weight: 600"   # OHLC cell to check
+    """Whole row red for BUY; OHLC cell yellow when it looks wrong."""
+    red = "background-color: #ffcdd2; color: #b71c1c; font-weight: 600"
+    yellow = "background-color: #fff59d; color: #6d4c00; font-weight: 600"
     fmt = {**{c: "{:.2f}" for c in [*RSI_FIELDS, *SHOW_MA, "CMP %"]},
            **{c: "{:,.0f}" for c in AVG_VOL}}
     t = t.copy()
     bad = t.pop("_ohlc_bad")
     for c in t.columns:                                  # blank sheet cells: show empty, not "None"
-        if not pd.api.types.is_numeric_dtype(t[c]):
-            t[c] = t[c].astype(object).where(t[c].notna(), "")
+        if t[c].dtype == object:
+            t[c] = t[c].where(t[c].notna(), "")
 
     def row_style(row):
         css = [red if row["Output"] == "BUY" else ""] * len(row)
@@ -907,50 +925,51 @@ def style(t: pd.DataFrame):
 
 
 # ====================================================================== DASHBOARD (2 x 2 boxes)
-def stat_strip(cells: list) -> str:
-    """cells = [(label, value, sub[, colour]), ...] -> a row of stat cards; the first one is highlighted."""
-    body = "".join(
-        f'<div class="stat{" hero" if i == 0 else ""}" style="--c:{c[3] if len(c) > 3 else "#0B1F3A"}">'
-        f'<div class="k">{esc(c[0])}</div><div class="v">{c[1]}</div><div class="s">{esc(c[2])}</div></div>'
-        for i, c in enumerate(cells))
-    return f'<div class="ui stats" style="--n:{len(cells)}">{body}</div>'
+def kpi_card(icon, name, value, sub, color, color2=None, pct=None, dark=False) -> str:
+    bar = (f'<div class="kpi-bar"><span style="width:{max(0, min(pct, 100)):.1f}%"></span></div>'
+           if pct is not None else "")
+    return (f'<div class="kpi{" dark" if dark else ""}" style="--c:{color};--c2:{color2 or color}">'
+            f'<div class="kpi-top"><span class="kpi-ic">{icon}</span>{esc(name)}</div>'
+            f'<div class="kpi-val">{value}</div><div class="kpi-sub">{sub}</div>{bar}</div>')
 
 
-def chg(v) -> str:
+def pct_pill(v, biggest) -> str:
+    """CMP % as a coloured pill: green ▲ up, red ▼ down, stronger colour = bigger move."""
     if pd.isna(v):
-        return '<span class="flat">—</span>'
-    if v > 0:
-        return f'<span class="chg up">+{v:.2f}%</span>'
-    if v < 0:
-        return f'<span class="chg down">−{abs(v):.2f}%</span>'
-    return '<span class="flat">0.00%</span>'
+        return '<span class="pct" style="background:#F1F5F9;color:#94A3B8">—</span>'
+    a = 0.12 + 0.5 * min(abs(v) / biggest, 1) if biggest else 0.25
+    if v >= 0:
+        return f'<span class="pct" style="background:rgba(22,163,74,{a:.2f});color:#14532D">▲ {v:.2f}%</span>'
+    return f'<span class="pct" style="background:rgba(220,38,38,{a:.2f});color:#7F1D1D">▼ {abs(v):.2f}%</span>'
 
 
-def cap_panel(cap: str, part: pd.DataFrame, has_sector: bool, universe: int) -> str:
-    color = CAP_COLOR.get(cap, "#0B1F3A")
-    head = (f'<div class="panel-h"><span class="t">{esc(cap)}<small>{universe:,} stocks screened</small></span>'
-            f'<span class="badge">{len(part)} BUY</span></div>')
+def cap_card(cap: str, part: pd.DataFrame, has_sector: bool) -> str:
+    icon, c1, c2 = CAP_STYLE.get(cap, ("📈", "#334155", "#64748B"))
+    head = (f'<div class="cap-head"><div><div class="cap-title">{icon} {esc(cap)}</div>'
+            f'<div class="cap-sub">BUY signals{" · grouped by sector" if has_sector else ""} · sorted by CMP %</div></div>'
+            f'<div class="cap-count"><b>{len(part)}</b><small>BUY</small></div></div>')
     if part.empty:
-        return f'<div class="panel" style="--c:{color}">{head}<div class="none">No BUY signals</div></div>'
+        return (f'<div class="cap" style="--c:{c1};--c2:{c2}">{head}'
+                f'<div class="empty"><span>😴</span>No BUY signals right now</div></div>')
+    biggest = part["CMP %"].abs().max()
     rows = []
     for sector, grp in part.groupby("Sector", sort=False):
         if has_sector:
-            rows.append(f'<tr class="grp"><td colspan="3">{esc(sector)}<span>{len(grp)}</span></td></tr>')
+            rows.append(f'<tr class="sec"><td colspan="3">{esc(sector)}<span class="sec-n">{len(grp)}</span></td></tr>')
         for _, r in grp.iterrows():
             price = num(pd.Series([r["CMP"]])).iloc[0]
-            rows.append(f'<tr><td class="sym">{esc(r["Symbol"])}</td>'
-                        f'<td class="r px">{f"{price:,.2f}" if pd.notna(price) else "—"}</td>'
-                        f'<td class="r">{chg(r["CMP %"])}</td></tr>')
-    table = ('<table class="grid"><thead><tr><th>Symbol</th><th class="r">CMP (₹)</th><th class="r">Change</th>'
+            price_txt = f"₹{price:,.2f}" if pd.notna(price) else "—"
+            rows.append(f'<tr><td class="sym">{esc(r["Symbol"])}</td><td class="r price">{price_txt}</td>'
+                        f'<td class="r">{pct_pill(r["CMP %"], biggest)}</td></tr>')
+    table = ('<table class="tbl"><thead><tr><th>Symbol</th><th class="r">CMP</th><th class="r">CMP %</th>'
              f'</tr></thead><tbody>{"".join(rows)}</tbody></table>')
-    return f'<div class="panel" style="--c:{color}">{head}<div class="panel-b">{table}</div></div>'
+    return f'<div class="cap" style="--c:{c1};--c2:{c2}">{head}<div class="cap-body">{table}</div></div>'
 
 
 def dashboard(table: pd.DataFrame, now, rule: str):
-    """Stat strip + four panels (Largecap, Midcap, Smallcap, Microcap) listing each group's BUY
-    stocks, grouped by sector and sorted by today's change (largest gain first)."""
-    caps_all = (table["M Cap"].fillna("").str.strip().str.lower() if "M Cap" in table.columns
-                else pd.Series("", index=table.index))
+    """KPI cards + four cap cards (Largecap, Midcap, Smallcap, Microcap), each listing only its BUY
+    stocks grouped by sector and sorted by CMP % (biggest gainer first)."""
+    caps_all = table["M Cap"].fillna("").str.strip().str.lower() if "M Cap" in table.columns else pd.Series("", index=table.index)
     buy_mask = table["Output"] == "BUY"
     buys = table[buy_mask].copy()
     caps = caps_all[buy_mask]
@@ -959,25 +978,29 @@ def dashboard(table: pd.DataFrame, now, rule: str):
     buys["Sector"] = buys["Sector"].fillna("").replace({"#N/A": ""})
     has_sector = buys["Sector"].ne("").any()
     buys["Sector"] = buys["Sector"].replace({"": "Other"})
-    buys["_other"] = buys["Sector"].eq("Other")                    # "Other" goes last in each panel
+    buys["_other"] = buys["Sector"].eq("Other")                    # "Other" goes last in each card
 
+    # ---- KPI row
     total = len(table)
-    cells = [("BUY signals", f"{len(buys):,}",
-              f"{100 * len(buys) / total:.1f}% of {total:,} · as of {now:%I:%M %p}" if total else "—")]
+    cards = [kpi_card("🎯", "Total BUY", len(buys),
+                      f"of {total:,} stocks · updated {now:%I:%M %p}", "#10B981",
+                      pct=100 * len(buys) / total if total else 0, dark=True)]
     for cap in CAPS:
+        icon, c1, c2 = CAP_STYLE[cap]
         n_cap = int((caps_all == cap.lower()).sum())
         n_buy = int((caps == cap.lower()).sum())
-        cells.append((cap, f"{n_buy:,}", f"{100 * n_buy / n_cap:.1f}% of {n_cap:,}" if n_cap else "—",
-                      CAP_COLOR[cap]))
-    st.markdown(stat_strip(cells), unsafe_allow_html=True)
+        share = 100 * n_buy / n_cap if n_cap else 0
+        cards.append(kpi_card(icon, cap, n_buy, f"of {n_cap:,} stocks · {share:.1f}%", c1, c2, pct=share))
+    st.markdown(f'<div class="kpis" style="--n:{len(cards)}">{"".join(cards)}</div>', unsafe_allow_html=True)
 
-    panels = []
+    # ---- 2 x 2 cap cards
+    html_cards = []
     for cap in CAPS:
         part = (buys.loc[caps == cap.lower(), ["_other", "Sector", "Symbol", "CMP", "CMP %"]]
                 .sort_values(["_other", "Sector", "CMP %"], ascending=[True, True, False])
                 .drop(columns="_other"))
-        panels.append(cap_panel(cap, part, has_sector, int((caps_all == cap.lower()).sum())))
-    st.markdown(f'<div class="ui panels">{"".join(panels)}</div>', unsafe_allow_html=True)
+        html_cards.append(cap_card(cap, part, has_sector))
+    st.markdown(f'<div class="caps">{"".join(html_cards)}</div>', unsafe_allow_html=True)
 
 
 # ====================================================================== LIVE TABLE
@@ -1032,10 +1055,11 @@ def live_table():
                    "copy the OHLC formula from a working row into them.")
 
     n_buy = int((table["Output"] == "BUY").sum())
-    cells = [("Stocks in view", f"{len(table):,}", f"as of {now:%I:%M %p} IST"),
-             ("BUY", f"{n_buy:,}", f"{100 * n_buy / len(table):.1f}% of view" if len(table) else "—"),
-             ("OHLC to check", f"{len(bad_syms):,}", "sheet OHLC far from CMP")]
-    st.markdown(stat_strip(cells), unsafe_allow_html=True)
+    cards = [kpi_card("📋", "Stocks in view", f"{len(table):,}", f"updated {now:%I:%M %p}", "#6366F1", "#A855F7", dark=True),
+             kpi_card("🎯", "BUY", n_buy, f"{100 * n_buy / len(table):.1f}% of view" if len(table) else "—",
+                      "#10B981", "#34D399", pct=100 * n_buy / len(table) if len(table) else 0),
+             kpi_card("⚠️", "Bad OHLC cells", len(bad_syms), "OHLC far away from CMP in the sheet", "#F59E0B", "#FBBF24")]
+    st.markdown(f'<div class="kpis" style="--n:3">{"".join(cards)}</div>', unsafe_allow_html=True)
 
     if only_buy:
         table = table[table["Output"] == "BUY"]
@@ -1050,7 +1074,7 @@ def live_table():
     table = table[[*cols, "Output"]]
 
     st.dataframe(style(table), hide_index=True, width="stretch", height=650)
-    st.download_button("Download CSV",
+    st.download_button("⬇️ Download CSV",
                        table.drop(columns="_ohlc_bad").to_csv(index=False).encode("utf-8-sig"),
                        "stock_list.csv", "text/csv")
 
